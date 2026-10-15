@@ -11,19 +11,18 @@ on:
         description: "The issue number to resolve"
         required: true
         type: string
-      max_iterations:
-        description: "Maximum repair retry loops"
-        required: false
-        default: "3"
-        type: string
+
+concurrency:
+  group: agentic-code-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   resolve-issue:
-    # Triggers on new issues, issues labeled 'agentic-fix', comments starting with /fix, or manual dispatch
     if: >
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'issues' && (github.event.action == 'opened' || contains(github.event.issue.labels.*.name, 'agentic-fix'))) ||
-      (github.event_name == 'issue_comment' && startsWith(github.event.comment.body, '/fix'))
+      (github.event_name == 'issues' && github.event.action == 'opened') ||
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'agentic-fix') ||
+      (github.event_name == 'issue_comment' && !github.event.issue.pull_request && startsWith(github.event.comment.body, '/fix'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -31,15 +30,13 @@ jobs:
       issues: write
 
     steps:
-      - name: Checkout External Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run AgenticCode Issue Resolver
-        uses: AmanRw/AgenticCode@master
+      - uses: AmanRw/AgenticCode@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           issue_number: ${{ github.event.issue.number || inputs.issue_number }}
-          max_iterations: ${{ inputs.max_iterations || '3' }}
+          max_iterations: 3
