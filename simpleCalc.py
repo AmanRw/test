@@ -6,6 +6,8 @@ def operation(a,b,op):
     elif op=='*':
         return a*b
     elif op=='/':
+        if b == 0:
+            return "Error: Division by zero"
         return a/b
     else:
         print('Invalid operation')
