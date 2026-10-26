@@ -8,21 +8,54 @@ class LinkedList:
         self.head = None
 
     def insert_at_index(self, index, data):
-        # 1. Create a dummy node that points to the real head
+        if index < 0:
+            raise IndexError("Index out of bounds")
+
         dummy = Node(0)
         dummy.next = self.head
-        
-        # 2. Traverse to the node immediately BEFORE the insertion point
         curr = dummy
+
         for _ in range(index):
-            if curr.next is None:  # Optional: Prevents out-of-bounds errors
-                break
+            if curr.next is None:
+                raise IndexError("Index out of bounds")
             curr = curr.next
-            
-        # 3. Perform a standard middle-insertion
+
         new_node = Node(data)
         new_node.next = curr.next
         curr.next = new_node
-        
-        # 4. Update the real head of the list
+
         self.head = dummy.next
+
+    def delete_at_index(self, index):
+        if index < 0 or self.head is None:
+            raise IndexError("Index out of bounds")
+
+        dummy = Node(0)
+        dummy.next = self.head
+        curr = dummy
+
+        for _ in range(index):
+            if curr.next is None:
+                raise IndexError("Index out of bounds")
+            curr = curr.next
+
+        if curr.next is None:
+            raise IndexError("Index out of bounds")
+
+        curr.next = curr.next.next
+        self.head = dummy.next
+
+    def delete(self, data):
+        dummy = Node(0)
+        dummy.next = self.head
+        curr = dummy
+
+        while curr.next is not None:
+            if curr.next.data == data:
+                curr.next = curr.next.next
+                self.head = dummy.next
+                return True
+            curr = curr.next
+
+        self.head = dummy.next
+        return False
