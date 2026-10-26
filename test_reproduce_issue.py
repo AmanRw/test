@@ -1,47 +1,92 @@
-import random
-import time
 import pytest
-from check2List import areEqual
+from insertLL import LinkedList
 
 
-def test_areEqual_identical():
-    assert areEqual([1, 2, 3], [1, 2, 3]) is True
+def test_insert_at_index_negative():
+    ll = LinkedList()
+    with pytest.raises(IndexError):
+        ll.insert_at_index(-1, 10)
 
 
-def test_areEqual_permuted():
-    assert areEqual([3, 5, 2, 5, 2], [2, 3, 5, 5, 2]) is True
+def test_insert_at_index_out_of_bounds():
+    ll = LinkedList()
+    ll.insert_at_index(0, 1)
+    ll.insert_at_index(1, 2)
+    # Length is 2; valid insertion indices are 0, 1, 2. Index 3 is out of bounds.
+    with pytest.raises(IndexError):
+        ll.insert_at_index(3, 3)
 
 
-def test_areEqual_different_lengths():
-    assert areEqual([1, 2], [1, 2, 3]) is False
+def test_insert_at_index_valid():
+    ll = LinkedList()
+    ll.insert_at_index(0, 10)  # insert at head of empty list
+    ll.insert_at_index(1, 30)  # insert at tail
+    ll.insert_at_index(1, 20)  # insert in middle
+
+    assert ll.head.data == 10
+    assert ll.head.next.data == 20
+    assert ll.head.next.next.data == 30
+    assert ll.head.next.next.next is None
 
 
-def test_areEqual_different_frequencies():
-    assert areEqual([1, 1, 2], [1, 2, 2]) is False
+def test_delete_at_index_empty_list():
+    ll = LinkedList()
+    with pytest.raises(IndexError):
+        ll.delete_at_index(0)
 
 
-def test_areEqual_disjoint():
-    assert areEqual([1, 2, 3], [4, 5, 6]) is False
+def test_delete_at_index_out_of_bounds():
+    ll = LinkedList()
+    ll.insert_at_index(0, 10)
+    ll.insert_at_index(1, 20)
+
+    with pytest.raises(IndexError):
+        ll.delete_at_index(-1)
+
+    with pytest.raises(IndexError):
+        ll.delete_at_index(2)
 
 
-def test_areEqual_empty():
-    assert areEqual([], []) is True
+def test_delete_at_index_valid():
+    ll = LinkedList()
+    ll.insert_at_index(0, 10)
+    ll.insert_at_index(1, 20)
+    ll.insert_at_index(2, 30)
+
+    # Delete index 0 (head)
+    ll.delete_at_index(0)
+    assert ll.head.data == 20
+    assert ll.head.next.data == 30
+
+    # Delete index 1 (tail)
+    ll.delete_at_index(1)
+    assert ll.head.data == 20
+    assert ll.head.next is None
+
+    # Delete remaining element
+    ll.delete_at_index(0)
+    assert ll.head is None
 
 
-def test_areEqual_performance():
-    # Construct large arrays of size N = 1,000,000
-    arr1 = list(range(500000)) * 2
-    arr2 = list(arr1)
-    random.seed(42)
-    random.shuffle(arr2)
+def test_delete_by_value():
+    ll = LinkedList()
+    ll.insert_at_index(0, 10)
+    ll.insert_at_index(1, 20)
+    ll.insert_at_index(2, 30)
 
-    start_time = time.perf_counter()
-    result = areEqual(arr1, arr2)
-    elapsed = time.perf_counter() - start_time
+    # Delete non-existent value
+    assert ll.delete(99) is False
 
-    assert result is True
-    # Pure Python loop implementation takes > 0.6 seconds.
-    # C-optimized Counter implementation takes < 0.2 seconds.
-    assert (
-        elapsed < 0.40
-    ), f"areEqual took {elapsed:.4f} seconds, expected < 0.40s (optimized Counter implementation required)"
+    # Delete middle value
+    assert ll.delete(20) is True
+    assert ll.head.data == 10
+    assert ll.head.next.data == 30
+    assert ll.head.next.next is None
+
+    # Delete head value
+    assert ll.delete(10) is True
+    assert ll.head.data == 30
+
+    # Delete tail/only value
+    assert ll.delete(30) is True
+    assert ll.head is None
