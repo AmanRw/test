@@ -45,6 +45,20 @@ class LinkedList:
         curr.next = curr.next.next
         self.head = dummy.next
 
+    def delete_at_end(self):
+        if self.head is None:
+            raise IndexError("Index out of bounds")
+
+        dummy = Node(0)
+        dummy.next = self.head
+        curr = dummy
+
+        while curr.next and curr.next.next:
+            curr = curr.next
+
+        curr.next = None
+        self.head = dummy.next
+
     def delete(self, data):
         dummy = Node(0)
         dummy.next = self.head
